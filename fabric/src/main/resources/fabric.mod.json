@@ -15,9 +15,6 @@
   "entrypoints": {
     "main": [
       "com.iafenvoy.sponsor.fabric.SponsorCoreFabric"
-    ],
-    "client": [
-      "com.iafenvoy.sponsor.fabric.client.SponsorCoreFabricClient"
     ]
   },
   "mixins": [

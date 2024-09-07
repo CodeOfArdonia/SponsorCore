@@ -7,7 +7,6 @@ import com.iafenvoy.sponsor.SponsorCore;
 @Mod(SponsorCore.MOD_ID)
 public final class SponsorCoreForge {
     public SponsorCoreForge() {
-        // Run our common setup.
         SponsorCore.init();
     }
 }

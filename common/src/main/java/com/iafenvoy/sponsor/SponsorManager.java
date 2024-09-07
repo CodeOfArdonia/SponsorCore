@@ -6,25 +6,43 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.iafenvoy.sponsor.util.NetworkUtil;
 import net.minecraft.util.Formatting;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SponsorManager {
     public static final Map<String, PatreonType> DATA = new HashMap<>();
+    private static final String CONFIG_PATH = "./config/sponsor-core.json";
 
     public static void fetchSponsorList() {
         try {
             SponsorCore.LOGGER.info("Starting to fetch sponsor list.");
             String data = NetworkUtil.getData("https://sponsor.iafenvoy.com/sponsor.json");
-            JsonArray array = JsonParser.parseString(data).getAsJsonArray();
-            for (JsonElement element : array.asList())
-                if (element instanceof JsonObject object && object.has("Patreon") && object.has("McUuid") && PatreonType.values().length > object.get("Patreon").getAsInt())
-                    DATA.put(object.get("McUuid").getAsString(), PatreonType.values()[object.get("Patreon").getAsInt()]);
+            parse(data);
+            FileUtils.write(new File(CONFIG_PATH), data, StandardCharsets.UTF_8);
             SponsorCore.LOGGER.info("Successfully fetch sponsor list.");
         } catch (Exception e) {
             SponsorCore.LOGGER.error("Failed to fetch sponsor list.", e);
+            try {
+                if (Files.exists(Path.of(CONFIG_PATH)))
+                    parse(FileUtils.readFileToString(new File(CONFIG_PATH), StandardCharsets.UTF_8));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
+    }
+
+    private static void parse(String data) {
+        JsonArray array = JsonParser.parseString(data).getAsJsonArray();
+        for (JsonElement element : array.asList())
+            if (element instanceof JsonObject object && object.has("Patreon") && object.has("McUuid") && PatreonType.values().length > object.get("Patreon").getAsInt())
+                DATA.put(object.get("McUuid").getAsString(), PatreonType.values()[object.get("Patreon").getAsInt()]);
     }
 
     @SuppressWarnings("unused")
